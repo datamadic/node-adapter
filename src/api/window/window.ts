@@ -921,6 +921,12 @@ export class _Window extends WebContents<WindowEvents> {
         }, this.identity)).then(() => undefined);
     }
 
+    public embedInto(parent: Identity): Promise<void> {
+        return this.wire.sendAction('set-parent', Object.assign({}, {
+            parent
+        }, this.identity)).then(() => undefined);
+    }
+
     /**
      * Reloads the window current page
      * @return {Promise.<void>}
