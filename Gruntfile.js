@@ -6,6 +6,7 @@ const os = require('os');
 const { exec } = require('child_process');
 const webpack = require('webpack');
 const { buildCore, resolveRuntimeVersion } = require('./coreUtils');
+const fs = require('fs');
 
 const outDir = path.resolve('out');
 const webpackConfig = {
@@ -131,10 +132,32 @@ module.exports = function (grunt) {
                 });
             } else {
                 grunt.log.ok('webpack task done');
+                const outpath = path.resolve(__dirname, 'out');
+                const filename = 'js-adapter.js';
+                const adapterPath = path.join(outpath, filename);
+                console.log(adapterPath);
+                let adapterStr = fs.readFileSync(adapterPath, 'utf8');
+                // console.log(adapterStr);
+                // adapterStr = adapterStr.replace(/eval/g, 'gpval');
+                // const glbl = global;
+                // const gval = (...args) => 
+                // fs.writeFileSync(adapterPath, 'const gpval = global.process.eval;\n' + adapterStr);
+                const v2Adapter = 
+                `global.foo = 'dont fuck with it';
+                global.eeeval = global.process.eval;
+                (function (eval) {
+                    return ${adapterStr}
+                })(global.process.eval)`
+                // global.process.eval
+                // fs.writeFileSync(adapterPath, adapterStr.replace(/eval/g, 'global.process.eval'));
+                // fs.writeFileSync(adapterPath, v2Adapter);
+                fs.writeFileSync(adapterPath, v2Adapter);
+                // adapterStr
                 done();
             }
         });
-    });
+    }); 
+    //${adapterStr.replace(/eval/g, 'gval')};
 
     grunt.registerTask('kill-processes', function () {
         ps.lookup({
